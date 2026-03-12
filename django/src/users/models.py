@@ -23,3 +23,10 @@ class User(AbstractUser):
     @property
     def is_site_admin(self):
         return self.role == self.ROLE_ADMIN
+
+    def save(self, *args, **kwargs):
+        if self.is_superuser:
+            self.role = self.ROLE_ADMIN
+        if self.role == self.ROLE_ADMIN and not self.team:
+            self.team, _ = Team.objects.get_or_create(name="admin")
+        super().save(*args, **kwargs)
