@@ -7,6 +7,12 @@ import PostDetail from "./pages/PostDetail";
 import PostCreate from "./pages/PostCreate";
 import PostEdit from "./pages/PostEdit";
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
 const styles: Record<string, React.CSSProperties> = {
   nav: {
     background: "#fff",
@@ -64,8 +70,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/posts/:id" element={<PostDetail />} />
-          <Route path="/posts/new" element={<PostCreate />} />
-          <Route path="/posts/:id/edit" element={<PostEdit />} />
+          <Route path="/posts/new" element={<ProtectedRoute><PostCreate /></ProtectedRoute>} />
+          <Route path="/posts/:id/edit" element={<ProtectedRoute><PostEdit /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
