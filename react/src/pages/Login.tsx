@@ -49,7 +49,7 @@ export default function Login() {
       <form onSubmit={submit}>
         {error && <div style={styles.error}>{error}</div>}
         <label style={styles.label}>Email *</label>
-        <input style={styles.input} type="text" value={form.username} onChange={set("username")} required placeholder="email*" />
+        <input style={styles.input} type="email" value={form.username} onChange={set("username")} required placeholder="email*" />
         <label style={styles.label}>Password *</label>
         <div style={{ position: "relative", marginBottom: 16 }}>
           <input
