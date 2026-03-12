@@ -4,6 +4,50 @@ import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import { Post, PaginatedResponse, Like } from "../types";
 
+function HeartsBurst({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 1300);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  const hearts = Array.from({ length: 15 }, (_, i) => ({
+    id: i,
+    left: `${5 + Math.random() * 90}%`,
+    top: `${5 + Math.random() * 85}%`,
+    delay: `${Math.random() * 0.3}s`,
+    fontSize: 18 + Math.floor(Math.random() * 28),
+  }));
+
+  return (
+    <>
+      <style>{`
+        @keyframes heartPop {
+          0%   { transform: scale(0) translateY(0);     opacity: 1; }
+          50%  { transform: scale(1.4) translateY(-24px); opacity: 1; }
+          100% { transform: scale(1)  translateY(-70px); opacity: 0; }
+        }
+      `}</style>
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9999 }}>
+        {hearts.map((h) => (
+          <span
+            key={h.id}
+            style={{
+              position: "absolute",
+              left: h.left,
+              top: h.top,
+              fontSize: h.fontSize,
+              color: "#e53935",
+              animation: `heartPop 1s ease-out ${h.delay} forwards`,
+            }}
+          >
+            ♥
+          </span>
+        ))}
+      </div>
+    </>
+  );
+}
+
 const fmt = (d: string) => new Date(d).toLocaleString();
 
 const cardStyle: React.CSSProperties = {
@@ -55,6 +99,7 @@ export default function Home() {
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const [likesPopup, setLikesPopup] = useState<number | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Post | null>(null);
+  const [heartKey, setHeartKey] = useState<number | null>(null);
 
   const fetchPosts = useCallback(() => {
     api.get(`/posts/?page=${page}`)
@@ -78,6 +123,7 @@ export default function Home() {
   }, [user, posts]);
 
   const toggleLike = async (post: Post) => {
+    const isLiked = likedPosts.has(post.id);
     await api.post(`/posts/${post.id}/likes/`);
     setLikedPosts((prev) => {
       const next = new Set(prev);
@@ -85,6 +131,7 @@ export default function Home() {
       else next.add(post.id);
       return next;
     });
+    if (!isLiked) setHeartKey(Date.now());
     fetchPosts();
   };
 
@@ -176,6 +223,7 @@ export default function Home() {
         </button>
       )}
 
+      {heartKey !== null && <HeartsBurst key={heartKey} onDone={() => setHeartKey(null)} />}
       {likesPopup !== null && <LikesPopup postId={likesPopup} onClose={() => setLikesPopup(null)} />}
 
       {deleteTarget && (
