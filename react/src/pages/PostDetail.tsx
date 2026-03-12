@@ -35,6 +35,14 @@ export default function PostDetail() {
       });
   }, [id, commentPage]);
 
+  const deleteComment = async (commentId: number) => {
+    await api.delete(`/comments/${commentId}/`);
+    const r = await api.get(`/comments/?post=${id}&page=${commentPage}`);
+    setComments(r.data.results);
+    setCommentTotal(r.data.count);
+    setCommentTotalPages(r.data.total_pages);
+  };
+
   const submitComment = async () => {
     if (!newComment.trim()) return;
     setSubmitting(true);
@@ -85,6 +93,14 @@ export default function PostDetail() {
             <span style={{ color: "#888" }}>{fmt(c.created_at)}</span>
           </div>
           <p style={{ whiteSpace: "pre-wrap" }}>{c.text}</p>
+          {user && c.user.id === user.id && (
+            <button
+              onClick={() => deleteComment(c.id)}
+              style={{ marginTop: 8, padding: "4px 12px", background: "#d32f2f", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 13 }}
+            >
+              Delete
+            </button>
+          )}
         </div>
       ))}
 
